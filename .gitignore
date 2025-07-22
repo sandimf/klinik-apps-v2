@@ -1,5 +1,4 @@
 # Generated files and directories
-./tmp/
 tmp/
 *.log
 
@@ -15,10 +14,10 @@ node_modules/
 
 # Next.js build output
 .next/
-out/ # If you're using static export (next export)
+out/
 
 # Go modules cache and build files
 *.exe
 *.test
 *.prof
-go.work.sum # If you're using Go workspaces
+go.work.sum
