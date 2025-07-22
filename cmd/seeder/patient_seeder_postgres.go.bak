@@ -1,0 +1,71 @@
+package main
+
+import (
+	"context"
+	"log"
+	"os"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+type Patient struct {
+	ID          uuid.UUID
+	NIK         string
+	FullName    string
+	BirthPlace  string
+	BirthDate   string
+	Gender      string
+	Address     string
+	RT          string
+	RW          string
+	Village     string
+	District    string
+	Religion    string
+	Marital     string
+	Job         string
+	Nationality string
+	ValidUntil  string
+	BloodType   string
+	Height      int
+	Weight      int
+	Age         int
+	Email       string
+	Phone       string
+	KTPImages   []string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+func main() {
+	dsn := os.Getenv("POSTGRES_DSN")
+	if dsn == "" {
+		log.Fatal("POSTGRES_DSN env required")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	db, err := pgxpool.New(ctx, dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	now := time.Now()
+	patients := []Patient{
+		{
+			ID: uuid.New(), NIK: "1234567890123456", FullName: "Budi Santoso", BirthPlace: "Jakarta", BirthDate: "1990-01-01", Gender: "Laki-laki", Address: "Jl. Merdeka 1", RT: "001", RW: "002", Village: "Desa A", District: "Kecamatan B", Religion: "Islam", Marital: "Belum Menikah", Job: "Karyawan", Nationality: "Indonesia", ValidUntil: "2025-12-31", BloodType: "O", Height: 170, Weight: 65, Age: 34, Email: "budi@example.com", Phone: "081234567890", KTPImages: []string{}, CreatedAt: now, UpdatedAt: now,
+		},
+		{
+			ID: uuid.New(), NIK: "6543210987654321", FullName: "Siti Aminah", BirthPlace: "Bandung", BirthDate: "1992-05-10", Gender: "Perempuan", Address: "Jl. Sudirman 2", RT: "003", RW: "004", Village: "Desa C", District: "Kecamatan D", Religion: "Kristen", Marital: "Menikah", Job: "Ibu Rumah Tangga", Nationality: "Indonesia", ValidUntil: "2027-06-30", BloodType: "A", Height: 160, Weight: 55, Age: 32, Email: "siti@example.com", Phone: "081298765432", KTPImages: []string{}, CreatedAt: now, UpdatedAt: now,
+		},
+	}
+
+	for _, p := range patients {
+		_, err := db.Exec(ctx, `INSERT INTO patients (id, nik, full_name, birth_place, birth_date, gender, address, rt, rw, village, district, religion, marital, job, nationality, valid_until, blood_type, height, weight, age, email, phone, ktp_images, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25) ON CONFLICT (nik) DO NOTHING`, p.ID, p.NIK, p.FullName, p.BirthPlace, p.BirthDate, p.Gender, p.Address, p.RT, p.RW, p.Village, p.District, p.Religion, p.Marital, p.Job, p.Nationality, p.ValidUntil, p.BloodType, p.Height, p.Weight, p.Age, p.Email, p.Phone, p.KTPImages, p.CreatedAt, p.UpdatedAt)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	log.Println("Seeder patients selesai!")
+}
